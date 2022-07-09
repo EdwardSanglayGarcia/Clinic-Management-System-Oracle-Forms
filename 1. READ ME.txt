@@ -1,0 +1,22 @@
+This is a project for Oracle 3 created by Edward Garcia
+This can be used as a reference for any incoming or current projects by any students who are in need of help with regards
+to the data management course or any database courses provided within the academic institution.
+
+May this serve as a guide for your project and for the betterment of our republic, may it be low tide or even high tide, 
+we shall make it better by means of our data management.(LOL)
+
+
+HOW TO MAKE IT WORK:
+1. PUT THE WHOLE FILE INTO YOUR DESKTOP LOCATION.
+2. OPEN EACH FMB FILES AND CHANGE EACH LOCATION INTO THE DESIGNATED LOCATION OF THAT FILE.
+
+NOTE:
+The only files that you need are the following:
+1. INSERTION 
+This contains all the insertion forms for the whole clinic
+
+2. VIEW UPDATE DELETE
+This contains all the viewing, deleting, and even updating of all the data for the whole clinic.
+
+3. PROJECT CODES/TABLE ONLY
+Contains all the declarations for each entity

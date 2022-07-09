@@ -1,0 +1,22 @@
+DIAGNOSIS
+---------------------------------------------
+SELECT * FROM DIAGNOSIS
+SELECT * FROM DIAGNOSISHISTORY;
+SELECT * FROM DRUG;
+SELECT * FROM PERSONINCHARGE
+---------------------------------------------
+
+PHYSICALEXAM 
+---------------------------------------------
+SELECT * FROM PHYSICALEXAM 
+SELECT * FROM PHYSICALEXAMHISTORY
+SELECT * FROM PERSONINCHARGE
+---------------------------------------------
+
+PHYSICALEXAM 
+---------------------------------------------
+SELECT * FROM PERSONALCONSULTATION
+SELECT * FROM PERSONALCONSULTATIONHISTORY
+SELECT * FROM PERSONINCHARGE
+---------------------------------------------
+

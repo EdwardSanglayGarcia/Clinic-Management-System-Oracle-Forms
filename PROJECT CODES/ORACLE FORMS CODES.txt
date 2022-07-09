@@ -1,0 +1,631 @@
+HOMEPAGE.FMX
+FAMILY HISTORY
+BEGIN
+NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\INSERTION\FAMILY HISTORY\FAMILY_HISTORY.fmx');
+EXIT_FORM(NO_VALIDATE);	
+END;
+
+FACULTY REGISTRATION
+BEGIN
+NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\INSERTION\FACULTY REGISTRATION\FACULTY REGISTRATION.fmx');
+EXIT_FORM(NO_VALIDATE);	
+END;
+
+STUDENT REGISTRATION
+BEGIN
+NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\INSERTION\STUDENT REGISTRATION\STUDENT REGISTRATION.fmx');
+EXIT_FORM(NO_VALIDATE);	
+END;
+
+DIAGNOSIS
+BEGIN
+NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\INSERTION\DIAGNOSIS\DIAGNOSIS.fmx');
+EXIT_FORM(NO_VALIDATE);	
+END;
+
+PHYSICAL EXAM
+BEGIN	
+NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\INSERTION\PHYSICAL EXAMINATION\PHYSICALEXAMINATION.fmx');
+EXIT_FORM(NO_VALIDATE);
+END;
+
+PERSONAL CONSULTATION
+BEGIN
+NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\INSERTION\PERSONAL CONSULTATION\PERSONAL CONSULTATION.fmx');
+EXIT_FORM(NO_VALIDATE);	
+END;
+
+DRUG
+BEGIN
+NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\INSERTION\DRUG\DRUG.fmx');
+EXIT_FORM(NO_VALIDATE);	
+END;
+
+REPORT GENERATION TO EXCEL
+declare
+ application ole2.obj_type;
+ workbooks ole2.obj_type;
+ workbook ole2.obj_type;
+worksheets ole2.obj_type;
+ worksheet ole2.obj_type;
+ cell ole2.obj_type;
+ arglist ole2.list_type;
+ row_num number;
+ col_num number;
+ row_width number;
+ fontObj ole2.obj_type;
+ cursor DRUGSUM is SELECT D_NO, NAME, COST, QUANTITY, (COST * QUANTITY) AS PRICE FROM DRUG;
+  cursor DIAGSUM is SELECT FIRST_NAME, LAST_NAME, D_NO, D_DATE FROM DIAGSUM;
+  cursor PESUM IS SELECT FIRST_NAME, LAST_NAME, PE_NO, PE_DATE FROM PESUM;
+  CURSOR PCSUM IS SELECT FIRST_NAME, LAST_NAME, PC_NO, PC_DATE FROM PCSUM;
+ 
+ procedure SetCellValue(rowid number,colid number,cellValue varchar) is
+ begin
+  arglist := ole2.create_arglist;
+  ole2.add_arg(arglist,rowid);
+  ole2.add_arg(arglist,colid);
+  cell:= ole2.get_obj_property(worksheet,'Cells',arglist);
+  --row_width := ole2.get_obj_property(worksheet,'WIDTH',arglist);
+  fontObj := ole2.get_obj_property(cell,'Font');
+  ole2.destroy_arglist(arglist);
+  ole2.set_property(cell,'value',cellValue);
+  ole2.set_property(fontObj,'Size',7);
+  ole2.set_property(fontObj,'',1); --<- ADD STYLER
+  ole2.set_property(fontObj,'ColorIndex',1); --SET 1 FOR BLACK
+  ole2.release_obj(cell);
+ end SetCellValue;
+ 
+ procedure app_init is
+  begin
+   application := ole2.create_obj('Excel.Application');
+   ole2.set_property(application,'Visible',true);
+   workbooks := ole2.get_obj_property(application,'workbooks');
+   workbook := ole2.invoke_obj(workbooks,'add');
+   worksheets := ole2.get_obj_property(application,'worksheets');
+   worksheet := ole2.invoke_obj(worksheets,'add');
+   ole2.set_property(worksheet,'Name','DRUG SHEET');
+ end app_init;
+ 
+ procedure save_excel(path varchar,filename varchar) is
+  begin
+    OLE2.Release_Obj(worksheet);
+    OLE2.Release_Obj(worksheets);
+    -- Save the Excel file created
+    If path is not null then
+       Arglist := OLE2.Create_Arglist;
+       OLE2.Add_Arg(Arglist,path||'\'||file_name||'.xls');
+       OLE2.Invoke(workbook, 'SaveAs', Arglist);
+       OLE2.Destroy_Arglist(Arglist);
+    end if;
+ end save_excel;
+
+
+BEGIN
+  -------------------------------------
+IF :DB_HOMEPAGE.LST_GENERATE= 'A' THEN
+	MESSAGE ('Physical Exam Summary');
+	app_init;
+    row_num:=1;
+    col_num:=1;
+    SetCellValue(row_num,col_num,'GIVEN NAME');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'FAMILY NAME');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'PE_NO');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'DATE');
+
+    for i in PESUM loop
+     row_num:=row_num + 1;
+     col_num:=1;
+     SetCellValue(row_num,col_num,i.first_name);    
+     col_num:=2;
+     SetCellValue(row_num,col_num,i.last_name);    
+     col_num:=3;
+     SetCellValue(row_num,col_num,i.PE_NO);  
+     col_num:=4;
+     SetCellValue(row_num,col_num,i.PE_DATE);       
+    end loop;    
+   save_excel('d:\excel_export','emp_data');       
+    OLE2.Release_Obj(workbook);
+    OLE2.Release_Obj(workbooks);
+    OLE2.Release_Obj(application); 
+	-------------------------------------
+	
+	
+	-------------------------------------
+	ELSIF :DB_HOMEPAGE.LST_GENERATE= 'B' THEN
+	MESSAGE ('Personal Consultation Summary');
+		app_init;
+    row_num:=1;
+    col_num:=1;
+    SetCellValue(row_num,col_num,'FIRST');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'LAST');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'PC_NO');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'DATE');
+
+    for i in PCSUM loop
+     row_num:=row_num + 1;
+     col_num:=1;
+     SetCellValue(row_num,col_num,i.first_name);    
+     col_num:=2;
+     SetCellValue(row_num,col_num,i.last_name);    
+     col_num:=3;
+     SetCellValue(row_num,col_num,i.PC_NO);  
+     col_num:=4;
+     SetCellValue(row_num,col_num,i.PC_DATE);       
+    end loop;    
+   save_excel('d:\excel_export','emp_data');       
+    OLE2.Release_Obj(workbook);
+    OLE2.Release_Obj(workbooks);
+    OLE2.Release_Obj(application); 
+	-------------------------------------
+	
+	-------------------------------------
+	ELSIF :DB_HOMEPAGE.LST_GENERATE= 'C' THEN
+	MESSAGE ('Diagnosis Summary');
+	  app_init;
+    row_num:=1;
+    col_num:=1;
+    SetCellValue(row_num,col_num,'GIVEN NAME');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'FAMILY NAME');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'D NO');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'DATE');
+
+    for i in DIAGSUM loop
+     row_num:=row_num + 1;
+     col_num:=1;
+     SetCellValue(row_num,col_num,i.first_name);    
+     col_num:=2;
+     SetCellValue(row_num,col_num,i.last_name);    
+     col_num:=3;
+     SetCellValue(row_num,col_num,i.D_NO);  
+     col_num:=4;
+     SetCellValue(row_num,col_num,i.D_DATE);       
+    end loop;    
+   save_excel('d:\excel_export','emp_data');       
+    OLE2.Release_Obj(workbook);
+    OLE2.Release_Obj(workbooks);
+    OLE2.Release_Obj(application); 
+  -------------------------------------
+	
+	-------------------------------------
+	ELSIF :DB_HOMEPAGE.LST_GENERATE= 'D' THEN
+	MESSAGE ('Drug Use Summary');
+	app_init;
+    row_num:=1;
+    col_num:=1;
+    SetCellValue(row_num,col_num,'DRUG NO.');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'NAME');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'COST');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'QUANTITY');
+    col_num:=col_num + 1;
+    SetCellValue(row_num,col_num,'PRICE');
+    
+    for i in DRUGSUM loop
+     row_num:=row_num + 1;
+     col_num:=1;
+     SetCellValue(row_num,col_num,i.d_no);    
+     col_num:=2;
+     SetCellValue(row_num,col_num,i.name);    
+     col_num:=3;
+     SetCellValue(row_num,col_num,i.cost);  
+     col_num:=4;
+     SetCellValue(row_num,col_num,i.quantity);    
+     col_num:=5;
+     SetCellValue(row_num,col_num,i.quantity * i.cost);    
+    end loop;    
+   save_excel('d:\excel_export','emp_data');       
+    OLE2.Release_Obj(workbook);
+    OLE2.Release_Obj(workbooks);
+    OLE2.Release_Obj(application); 
+	-------------------------------------
+
+	-------------------------------------
+ELSE
+	MESSAGE('PLEASE SELECT A REPORT THAT YOU WANT TO GENERATE');
+	END IF;
+END;
+
+VIEWING OF SPECIFIC DATA
+BEGIN
+
+IF :DB_HOMEPAGE.LST_PATIENT= 'A' THEN
+	MESSAGE ('Physical Examination'); 
+	NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\VIEW UPDATE DELETE\PHYSICAL EXAMINATION\PHYSICALEXAMINATION.fmx');
+	EXIT_FORM('NO VALIDATE');
+
+	
+	ELSIF :DB_HOMEPAGE.LST_PATIENT= 'B' THEN
+	MESSAGE ('Diagnosis');
+	NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\VIEW UPDATE DELETE\DIAGNOSIS\DND.fmx');
+	EXIT_FORM('NO VALIDATE');
+	
+	ELSIF :DB_HOMEPAGE.LST_PATIENT= 'C' THEN
+	MESSAGE ('Family History');
+	NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\VIEW UPDATE DELETE\FAMILY HISTORY\FAMILY HISTORY.fmx');
+	EXIT_FORM('NO VALIDATE');
+	
+	ELSIF :DB_HOMEPAGE.LST_PATIENT= 'D' THEN
+	MESSAGE ('Personal Consultation');
+	NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\VIEW UPDATE DELETE\PERSONAL CONSULTATION\CONSULTATION.fmx');
+	EXIT_FORM('NO VALIDATE');
+	
+	ELSIF :DB_HOMEPAGE.LST_PATIENT= 'E' THEN
+	NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\VIEW UPDATE DELETE\PERSON INFORMATION\GENERAL INFORMATION.fmx');
+	EXIT_FORM('NO VALIDATE');
+	
+ELSE
+	MESSAGE('PLEASE SELECT A REPORT THAT YOU WANT TO VIEW');
+	END IF;
+END;
+
+LOGOUT
+BEGIN
+	NEW_FORM ('C:\Users\Person\Desktop\ORACLE PROJECT\LOGIN.fmx');
+	EXIT_FORM(NO_VALIDATE);
+	END;
+
+
+LOGIN.FMX
+LOGIN
+DECLARE
+V VARCHAR(90)	;
+BEGIN
+
+SELECT 'X' INTO V FROM ACCOUNT
+WHERE 
+LOWER (USERNAME) = LOWER(:DB_LOGIN.TB_UN)
+AND
+PASSWORD = :DB_LOGIN.TB_PW;
+
+IF SQL%FOUND THEN
+BEGIN
+	NEW_FORM ('C:\Users\Person\Desktop\ORACLE PROJECT\HOMEPAGE.fmx');
+	EXIT_FORM(NO_VALIDATE);
+	END;
+END IF;
+
+EXCEPTION
+	WHEN
+	NO_DATA_FOUND THEN
+	MESSAGE ('USERNAME OR PASSWORD IS INCORRECT!');
+END;
+
+
+REGISTER
+BEGIN
+	NEW_FORM ('C:\Users\Person\Desktop\ORACLE PROJECT\USERS.fmx');
+	EXIT_FORM(NO_VALIDATE);
+	END;
+
+
+
+USERS.FMX
+CANCEL
+BEGIN
+	NEW_FORM ('C:\Users\Person\Desktop\ORACLE PROJECT\USERS.fmx');
+	EXIT_FORM(NO_VALIDATE);
+	END;
+
+SUBMIT
+BEGIN
+	
+	IF :DB_USERS.TB_PW = :DB_USERS.TB_CPW THEN
+  INSERT INTO PERSONINCHARGE VALUES (:DB_USERS.TB_PICID,:DB_USERS.TB_GN,:DB_USERS.TB_FN,:DB_USERS.TB_POS);
+	INSERT INTO ACCOUNT VALUES (:DB_USERS.TB_PICID,:DB_USERS.TB_UN,:DB_USERS.TB_PW);
+	:system.message_level := '5'; 
+   commit;
+  :system.message_level := '0';
+	MESSAGE('ACCOUNT FOR '||UPPER(:DB_USERS.TB_GN)||' IS NOW CREATED');
+	:DB_USERS.TB_PICID:='';
+	:DB_USERS.TB_FN:='';
+	:DB_USERS.TB_GN:='';
+	:DB_USERS.TB_UN:='';
+	:DB_USERS.TB_PW:='';
+	:DB_USERS.TB_CPW:='';
+	
+	ELSE 
+	MESSAGE('THE PASSWORD AND CONFIRM PASSWORD SHOULD BE THE SAME');
+	END IF;
+	
+END;
+
+
+DIAGNOSIS.FMX
+SUBMIT
+BEGIN
+	INSERT INTO DIAGNOSIS VALUES 
+(
+:DB_DIAGNOSIS.TB_PID,
+:DB_DIAGNOSIS.TB_DESCRIPTION,
+:DB_DIAGNOSIS.TB_DNO
+);
+	INSERT INTO DIAGNOSISHISTORY VALUES 
+(
+:DB_DIAGNOSIS.TB_DNO,
+SYSDATE,
+:DB_DIAGNOSIS.TB_PICID
+);
+
+:SYSTEM.MESSAGE_LEVEL:= '5';
+COMMIT;
+:SYSTEM.MESSAGE_LEVEL:='0';
+	MESSAGE('DIAGNOSIS RECORD SUBMITTED');
+	EXCEPTION
+	WHEN NO_DATA_FOUND THEN MESSAGE('NO DATA FOUND TO SOME FIELDS');
+	WHEN TOO_MANY_ROWS THEN MESSAGE('TOO MANY ROWS ARE BEING RETURNED!');
+	WHEN OTHERS THEN MESSAGE ('COULD NOT IDENTIFY THE VALUE OR NO VALUE INSERTED DURING REGISTRATION PHASE!');
+
+	END;
+
+
+DRUG.FMX
+SUBMIT
+BEGIN
+
+INSERT INTO DRUG VALUES 
+(
+:DB_DRUG.TB_DNO,
+:DB_DRUG.TB_NAME,
+:DB_DRUG.TB_CST,
+:DB_DRUG.TB_QTY
+);
+
+:SYSTEM.MESSAGE_LEVEL:='5';
+COMMIT;
+:SYSTEM.MESSAGE_LEVEL:='0';	
+MESSAGE('DRUG PRESCRIBED');
+
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN MESSAGE('NO DATA FOUND TO SOME FIELDS');
+	WHEN TOO_MANY_ROWS THEN MESSAGE('TOO MANY ROWS ARE BEING RETURNED!');
+	WHEN OTHERS THEN MESSAGE ('COULD NOT IDENTIFY THE VALUE OR NO VALUE INSERTED DURING REGISTRATION PHASE!');
+
+END;
+
+
+
+FACULTY REGISTRATION.FMX
+SUBMIT
+BEGIN
+
+INSERT INTO CLINIC VALUES 
+(
+:DB_REG.TB_PID,
+'2',
+:DB_REG.TB_PFN,
+:DB_REG.TB_PLN
+);
+
+
+INSERT INTO INFORMATION VALUES 
+(
+:DB_REG.TB_PID,
+:DB_REG.TB_GID,
+:DB_REG.TB_PMOBILE,
+:DB_REG.TB_GENDER,
+:DB_REG.TB_NATIONALITY,
+--TO_CHAR(TO_DATE(:DB_REG.TB_BIRTHDATE,'DD-MON-YYYY'),'DD/MM/YYYY'),
+TO_DATE(:DB_REG.TB_BIRTHDATE,'DD/MM/YYYY'),
+:DB_REG.TB_CITY,
+:DB_REG.TB_CAMPUS
+);
+
+INSERT INTO GUARDIAN VALUES
+(
+:DB_REG.TB_GID,
+:DB_REG.TB_GFN,
+:DB_REG.TB_GLN,
+:DB_REG.TB_GMOBILE,
+:DB_REG.TB_RELATION
+);
+
+--add a type I.D in here.
+--[urgent update, remove the TB_TYPE IN ORDER TO SOLVE THE PROBLEM]
+INSERT INTO FACULTY VALUES
+(
+:DB_REG.TB_PID,
+'2',
+:DB_REG.TB_CID
+);
+
+
+
+:SYSTEM.MESSAGE_LEVEL:='5';
+COMMIT;
+:SYSTEM.MESSAGE_LEVEL:='0';
+MESSAGE('FACULTY INFORMATION CREATED');
+	EXCEPTION
+	WHEN NO_DATA_FOUND THEN MESSAGE('NO DATA FOUND TO SOME FIELDS');
+	WHEN TOO_MANY_ROWS THEN MESSAGE('TOO MANY ROWS ARE BEING RETURNED!');
+	WHEN OTHERS THEN MESSAGE ('COULD NOT IDENTIFY THE VALUE OR NO VALUE INSERTED DURING REGISTRATION PHASE!');
+
+	
+
+END;
+
+FAMILY HISTORY.FMX
+SUBMIT
+DECLARE
+VAR_RELATION VARCHAR(99);
+CURSOR CUR_PRACTICAL IS SELECT RELATION FROM FAMILYHISTORY
+WHERE PERSON_ID = 33433;
+
+VAR_CF BOOLEAN:=FALSE;
+VAR_CM BOOLEAN:=FALSE;
+
+BEGIN
+OPEN CUR_PRACTICAL;
+LOOP
+FETCH CUR_PRACTICAL INTO VAR_RELATION;
+
+IF VAR_RELATION = 'FATHER' THEN
+
+	VAR_CF := TRUE;
+	
+ELSIF VAR_RELATION = 'MOTHER' THEN
+
+	VAR_CM:= TRUE;
+END IF;
+
+EXIT WHEN CUR_PRACTICAL%NOTFOUND;
+END LOOP;
+CLOSE CUR_PRACTICAL;
+
+IF 
+:DB_FAMILYHISTORY.TB_RELATION='FATHER' AND VAR_CF = TRUE
+THEN 
+MESSAGE('ONLY 1 FATHER CAN BE INSERTED');
+
+ELSIF 
+:DB_FAMILYHISTORY.TB_RELATION='MOTHER' AND VAR_CM = TRUE
+THEN 
+MESSAGE('ONLY 1 MOTHER CAN BE INSERTED');
+
+ELSE
+INSERT INTO FAMILYHISTORY VALUES (:DB_FAMILYHISTORY.TB_RELATION,:DB_FAMILYHISTORY.TB_PID,:DB_FAMILYHISTORY.TB_LN,:DB_FAMILYHISTORY.TB_FN,:DB_FAMILYHISTORY.TB_ILLNESS);
+
+:SYSTEM.MESSAGE_LEVEL:='5';
+COMMIT;
+:SYSTEM.MESSAGE_LEVEL:='0';
+MESSAGE('FAMILY HISTORY INSERTED');
+END IF;
+
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN MESSAGE('NO DATA FOUND TO SOME FIELDS');
+	WHEN TOO_MANY_ROWS THEN MESSAGE('TOO MANY ROWS ARE BEING RETURNED!');
+	WHEN OTHERS THEN MESSAGE ('COULD NOT IDENTIFY THE VALUE OR NO VALUE INSERTED DURING REGISTRATION PHASE!');
+
+END;
+
+PERSONAL CONSULTATION.FMX
+SUBMIT
+BEGIN
+	
+INSERT INTO PERSONALCONSULTATION VALUES 
+(
+:DB_CONSULTATION.TB_PID,
+:DB_CONSULTATION.TB_PCNO,
+:DB_CONSULTATION.TB_COMPLAINTS,
+:DB_CONSULTATION.TB_FINDINGS,
+:DB_CONSULTATION.TB_ASSESSMENT,
+:DB_CONSULTATION.TB_PLANS
+);
+
+INSERT INTO PERSONALCONSULTATIONHISTORY VALUES 
+(
+:DB_CONSULTATION.TB_PCNO,
+SYSDATE,
+:DB_CONSULTATION.TB_PICID
+);
+
+:SYSTEM.MESSAGE_LEVEL := '5';
+COMMIT;
+:SYSTEM.MESSAGE_LEVEL :='0';
+	MESSAGE('SUCCESSFULLY RECORDED!');
+	EXCEPTION
+	WHEN NO_DATA_FOUND THEN MESSAGE('NO DATA FOUND TO SOME FIELDS');
+	WHEN TOO_MANY_ROWS THEN MESSAGE('TOO MANY ROWS ARE BEING RETURNED!');
+	WHEN OTHERS THEN MESSAGE ('COULD NOT IDENTIFY THE VALUE OR NO VALUE INSERTED DURING REGISTRATION PHASE!');
+
+END;
+
+PHYSICALEXAMINATION.FMX
+SUBMIT
+BEGIN
+INSERT INTO PHYSICALEXAM VALUES (:DB_PHYSICALEXAMINATION.TB_PID, :DB_PHYSICALEXAMINATION.TB_PENO, :DB_PHYSICALEXAMINATION.TB_FT, :DB_PHYSICALEXAMINATION.TB_IN, :DB_PHYSICALEXAMINATION.TB_RATE, :DB_PHYSICALEXAMINATION.TB_SYS, :DB_PHYSICALEXAMINATION.TB_DIA, :DB_PHYSICALEXAMINATION.TB_IRREG, :DB_PHYSICALEXAMINATION.TB_DIAG);
+INSERT INTO PHYSICALEXAMHISTORY 
+VALUES 
+(
+:DB_PHYSICALEXAMINATION.TB_PENO,
+SYSDATE, 
+:DB_PHYSICALEXAMINATION.TB_PICID
+);
+:system.message_level := '5'; 
+-- to suppress all messages with severity below level 5.
+ commit;
+:system.message_level := '0';
+MESSAGE ('SUCCESSFULLY INSERTED');
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN MESSAGE('NO DATA FOUND TO SOME FIELDS');
+	WHEN TOO_MANY_ROWS THEN MESSAGE('TOO MANY ROWS ARE BEING RETURNED!');
+	WHEN OTHERS THEN MESSAGE ('COULD NOT IDENTIFY THE VALUE OR NO VALUE INSERTED DURING REGISTRATION PHASE!');
+
+END;
+
+--INSERT INTO PHYSICALEXAMHISTORY VALUES (:DB_PHYSICALEXAMINATION.TB_PENO,TO_DATE('2003/07/09', 'mm/dd/yyyy'), :DB_PHYSICALEXAMINATION.TB_PICID);
+
+BEGIN
+
+INSERT INTO CLINIC VALUES 
+(
+:DB_REG.TB_PID,
+'1',
+:DB_REG.TB_PFN,
+:DB_REG.TB_PLN
+);
+
+
+INSERT INTO INFORMATION VALUES 
+(
+:DB_REG.TB_PID,
+:DB_REG.TB_GID,
+:DB_REG.TB_PMOBILE,
+:DB_REG.TB_GENDER,
+:DB_REG.TB_NATIONALITY,
+--TO_CHAR(TO_DATE(:DB_REG.TB_BIRTHDATE,'DD-MON-YYYY'),'DD/MM/YYYY'),
+TO_DATE(:DB_REG.TB_BIRTHDATE,'DD/MM/YYYY'),
+:DB_REG.TB_CITY,
+:DB_REG.TB_CAMPUS
+);
+
+INSERT INTO GUARDIAN VALUES
+(
+:DB_REG.TB_GID,
+:DB_REG.TB_GFN,
+:DB_REG.TB_GLN,
+:DB_REG.TB_GMOBILE,
+:DB_REG.TB_RELATION
+);
+
+--add a type I.D in here.
+--[urgent update, remove the TB_TYPE IN ORDER TO SOLVE THE PROBLEM]
+INSERT INTO STUDENT VALUES
+(
+:DB_REG.TB_PID,
+:DB_REG.TB_CID,
+'1',
+:DB_REG.TB_YR
+);
+
+
+:SYSTEM.MESSAGE_LEVEL:='5';
+COMMIT;
+:SYSTEM.MESSAGE_LEVEL:='0';
+MESSAGE('STUDENT INFORMATION CREATED');
+	
+EXCEPTION WHEN OTHERS THEN MESSAGE('PLEASE INPUT A VALID VALUE');	
+
+END;
+
+
+
+CANCEL
+BEGIN
+
+NEW_FORM('C:\Users\Person\Desktop\ORACLE PROJECT\HOMEPAGE.fmx');
+EXIT_FORM(NO_VALIDATE);
+	
+END;
+
+
